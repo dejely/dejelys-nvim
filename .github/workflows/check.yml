@@ -1,0 +1,17 @@
+name: Check installer
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: bash -n install.sh scripts/restore.sh
+      - name: Check shell scripts
+        run: shellcheck install.sh scripts/restore.sh
+      - name: Test isolated install and restore
+        run: python3 -m unittest discover -s tests -v
