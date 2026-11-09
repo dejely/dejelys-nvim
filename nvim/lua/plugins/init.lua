@@ -1,4 +1,6 @@
 return {
+  { 'folke/which-key.nvim',
+    config = function() require('config.shortcuts').setup() end },
   { 'stevearc/conform.nvim',
     config = function() require('config.formatting').setup() end },
   { 'catppuccin/nvim', name = 'catppuccin', priority = 1000,
