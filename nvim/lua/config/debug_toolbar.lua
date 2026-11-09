@@ -12,6 +12,25 @@ local function editor_focus()
   if valid(M.editor) then vim.api.nvim_set_current_win(M.editor) end
 end
 
+local function source_window()
+  local session = dap.session()
+  local source = session and session.current_frame and session.current_frame.source
+  if source and source.path then
+    local buffer = vim.fn.bufnr(source.path)
+    for _, win in ipairs(vim.fn.win_findbuf(buffer)) do
+      if vim.api.nvim_win_get_tabpage(win) == vim.api.nvim_get_current_tabpage()
+        and vim.api.nvim_win_get_config(win).relative == '' then return win end
+    end
+  end
+  return M.editor
+end
+
+local function close_scopes()
+  local editor = source_window()
+  if M.scope_view then M.scope_view.close(); M.scope_view = nil end
+  if valid(editor) then vim.api.nvim_set_current_win(editor) end
+end
+
 local function click()
   local mouse = vim.fn.getmousepos()
   if mouse.winid ~= M.win then return end
@@ -69,9 +88,15 @@ function M.toggle()
 end
 
 function M.scopes()
-  if M.scope_view then M.scope_view.close(); M.scope_view = nil; return end
+  if M.scope_view then close_scopes(); return end
+  local session = dap.session()
+  if not session or not session.stopped_thread_id or not session.current_frame then
+    vim.notify('Pause or hit a breakpoint before inspecting variables', vim.log.levels.INFO)
+    return
+  end
   local widgets = require('dap.ui.widgets')
   M.scope_view = widgets.builder(widgets.scopes)
+    .new_buf(widgets.with_refresh(widgets.scopes.new_buf, 'scopes'))
     .new_win(function(buf)
       local win = vim.api.nvim_open_win(buf, true, { relative = 'editor',
         width = math.max(1, math.min(70, vim.o.columns - 4)),
@@ -79,9 +104,7 @@ function M.scopes()
         col = math.max(0, math.floor((vim.o.columns - math.min(70, vim.o.columns - 4)) / 2)),
         style = 'minimal', border = 'rounded', title = ' Variables ', title_pos = 'center' })
       for _, key in ipairs({ 'q', '<Esc>' }) do
-        vim.keymap.set('n', key, function()
-          if M.scope_view then M.scope_view.close(); M.scope_view = nil end
-        end, { buffer = buf })
+        vim.keymap.set('n', key, close_scopes, { buffer = buf })
       end
       return win
     end).build()
@@ -134,7 +157,8 @@ function M.setup(client)
   vim.api.nvim_create_autocmd({ 'VimResized', 'TabEnter' }, { group = group, callback = redraw })
   vim.api.nvim_create_autocmd('WinEnter', { group = group, callback = function()
     local win = vim.api.nvim_get_current_win()
-    if vim.api.nvim_win_get_config(win).relative == '' then M.editor = win end
+    if vim.api.nvim_win_get_config(win).relative == ''
+      and vim.bo[vim.api.nvim_win_get_buf(win)].buftype == '' then M.editor = win end
   end })
   M.editor = vim.api.nvim_get_current_win()
 end
