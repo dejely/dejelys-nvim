@@ -117,6 +117,29 @@ class DebugTests(unittest.TestCase):
         self.nvim.exec_lua("require('config.debugging').action('stop')")
         self.wait("require('dap').session() == nil")
 
+    def test_f5_enter_prefills_executable_from_source_project(self):
+        source, executable, line = self.fixture('rust')
+        target = self.h.project / 'target/debug'
+        target.mkdir(parents=True)
+        binary = target / 'banana-demo'
+        executable.rename(binary)
+        (self.h.project / 'Cargo.toml').write_text('[package]\nname="banana-demo"\nversion="0.1.0"\nedition="2021"\n[[bin]]\nname="banana-demo"\npath="banana.rs"\n')
+        unrelated = self.h.home / 'unrelated project'
+        unrelated.mkdir()
+        self.nvim.command('cd ' + self.nvim.funcs.fnameescape(str(unrelated)))
+        self.nvim.command('edit ' + self.nvim.funcs.fnameescape(str(source)))
+        self.nvim.current.window.cursor = (line, 0)
+        # Accept the prefilled value exactly as pressing Enter at the prompt.
+        self.nvim.exec_lua("_G.launch_prompt_default=nil; _G.old_debug_input=vim.fn.input; vim.fn.input=function(_,default) _G.launch_prompt_default=default; return default end; require('dap').toggle_breakpoint()")
+        self.nvim.input('<F5>')
+        self.wait('_G.launch_prompt_default ~= nil')
+        self.assertEqual(self.nvim.exec_lua('return _G.launch_prompt_default'), str(binary))
+        self.wait("require('dap').session() ~= nil and require('dap').session().current_frame ~= nil")
+        self.assertEqual(self.nvim.exec_lua("return require('dap').session().config.cwd"), str(self.h.project))
+        self.assertEqual(self.value(), '40')
+        self.nvim.exec_lua("vim.fn.input=_G.old_debug_input; require('config.debugging').action('stop')")
+        self.wait("require('dap').session() == nil")
+
     def test_failed_launch_leaves_no_toolbar(self):
         self.nvim.exec_lua("local d=require('dap'); _G.debug_session_seen=false; d.listeners.on_session['failure-test']=function(_,s) if s then _G.debug_session_seen=true end end; d.run({name='Missing fixture',type='codelldb',request='launch',program='/does-not-exist/banana',terminal='console'})")
         self.wait('_G.debug_session_seen')

@@ -19,13 +19,20 @@ It does not open large panels automatically. Ctrl+H remains the shortcut guide.
 
 2. Open the source file in Neovim. Place the cursor on an executable line and
    press **Space b b** to add a breakpoint.
-3. Press **F5**. Select a project configuration or “Launch executable”, then
-   choose the compiled binary (for Rust, usually under `target/debug/`).
+3. Press **F5**. It switches to the open source file's project directory before
+   selecting a launch configuration. The generic executable prompt prefills a
+   compiled binary when it finds exactly one, so **Enter** accepts it. Otherwise,
+   choose an executable file (for Rust, usually under `target/debug/`).
 4. At the breakpoint, inspect variables and step through the code. The toolbar
    switches its first control between Continue and Pause as the program stops
    or runs. Use Stop or **Space b q** to end the session.
 
 The debugger does not compile your program. Rebuild after source changes.
+Project roots are detected from Cargo.toml, CMakeLists.txt, Makefile, or .git;
+standalone files use their containing directory. Executable detection searches
+`target/debug`, `build`, and the project root, excluding scripts and shared
+libraries. Custom output directories and multiple executables require selecting
+the binary path yourself. Accepting a directory does not start a program.
 Files in custom languages such as CSL are input to your interpreter: debug the
 Rust interpreter implementation, and pass the CSL file as a program argument.
 Direct source-level debugging of CSL would need support inside the interpreter.
@@ -117,6 +124,10 @@ configured but has not been tested on a Mac.
 - **Executable launch fails:** verify its path, executable permissions, required
   shared libraries, arguments, and `:DapShowLog`. Cancel the executable prompt
   to return to editing without a session.
+- **“Run aborted” after Enter:** the prompt contained a folder rather than a
+  compiled executable, or you cancelled it. Build first and select the binary
+  file, such as `target/debug/cmsc124-interpreter`. The default is a file only
+  when exactly one compiled executable is found.
 - **F-keys do something else:** your terminal, desktop, or laptop Fn layer may
   intercept them. Use toolbar clicks or `:DapContinue` / `:DapStepOver`, or remap
   them in `lua/config/debugging.lua`.

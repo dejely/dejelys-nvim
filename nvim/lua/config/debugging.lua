@@ -1,5 +1,42 @@
 local M = {}
 
+local function project_root()
+  local source = vim.api.nvim_buf_get_name(0)
+  if source == '' or vim.bo.buftype ~= '' then return vim.fn.getcwd() end
+  local root = vim.fs.root(source, { 'Cargo.toml', 'CMakeLists.txt', 'Makefile', '.git' })
+  return root and root ~= vim.env.HOME and root or vim.fs.dirname(source)
+end
+
+local function executable_default(root)
+  local candidates = {}
+  local magic_numbers = {
+    ['\127ELF'] = true,
+    ['\254\237\250\206'] = true, ['\206\250\237\254'] = true,
+    ['\254\237\250\207'] = true, ['\207\250\237\254'] = true,
+    ['\202\254\186\190'] = true, ['\190\186\254\202'] = true,
+  }
+  for _, directory in ipairs({ root .. '/target/debug', root .. '/build', root }) do
+    if vim.fn.isdirectory(directory) == 1 then
+      for name in vim.fs.dir(directory) do
+        local path = directory .. '/' .. name
+        if vim.fn.executable(path) == 1 and vim.fn.isdirectory(path) == 0
+          and not name:match('%.so[%d%.]*$') and not name:match('%.dylib$') then
+          local file = io.open(path, 'rb')
+          if file then
+            local magic = file:read(4)
+            file:close()
+            if magic_numbers[magic] then candidates[#candidates + 1] = path end
+          end
+        end
+      end
+    end
+  end
+  if #candidates == 1 then return candidates[1] end
+  -- Never silently choose the wrong binary in a project with multiple targets.
+  if vim.fn.filereadable(root .. '/Cargo.toml') == 1 then return root .. '/target/debug/' end
+  return root .. '/'
+end
+
 function M.keys()
   local bindings = {
     { '<F5>', 'continue', 'Start / continue debugger' },
@@ -39,6 +76,7 @@ function M.action(action)
       vim.notify('Run :MasonInstall codelldb before debugging', vim.log.levels.ERROR)
       return
     end
+    if not dap.session() then vim.api.nvim_set_current_dir(project_root()) end
     dap.continue()
   elseif not dap.session() then vim.notify('Start debugging with F5 first', vim.log.levels.INFO)
   elseif action == 'scopes' then require('config.debug_toolbar').scopes()
@@ -62,16 +100,17 @@ function M.setup()
   local configuration = {
     name = 'Launch executable', type = 'codelldb', request = 'launch',
     program = function()
-      local ok, path = pcall(vim.fn.input, 'Executable: ', vim.fn.getcwd() .. '/', 'file')
+      local root = project_root()
+      local ok, path = pcall(vim.fn.input, 'Executable (compiled binary): ', executable_default(root), 'file')
       if not ok or path == '' then return dap.ABORT end
       path = vim.fn.fnamemodify(vim.fn.expand(path), ':p')
       if vim.fn.executable(path) ~= 1 or vim.fn.isdirectory(path) == 1 then
-        vim.notify('Choose a compiled executable (build with debug symbols first)', vim.log.levels.WARN)
+        vim.notify('Select an executable FILE, not a folder. Rust: cargo build, then choose target/debug/<binary>.', vim.log.levels.WARN)
         return dap.ABORT
       end
       return path
     end,
-    cwd = '${workspaceFolder}', args = {}, terminal = 'console', stopOnEntry = false,
+    cwd = project_root, args = {}, terminal = 'console', stopOnEntry = false,
   }
   for _, filetype in ipairs({ 'rust', 'c', 'cpp' }) do
     dap.configurations[filetype] = { vim.deepcopy(configuration) }
