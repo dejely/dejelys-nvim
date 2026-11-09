@@ -28,6 +28,21 @@ headless isolation, autosave stopping, and the Ctrl+H/Space popup. The optional
 suite is skipped when pynvim or NVIM_TEST_PLUGIN_DIR is absent. It tests input
 at Neovim's API boundary, not physical key transmission through your terminal.
 
+For real CodeLLDB checks, install CodeLLDB through Mason and have a C compiler
+and optionally `c++` / `rustc` available:
+
+```sh
+NVIM_TEST_PLUGIN_DIR="$HOME/.local/share/nvim/lazy" \
+  uv run --with pynvim python -m unittest discover -s tests -p test_debugging.py -v
+```
+
+This suite compiles temporary fixtures, hits breakpoints, evaluates variables,
+steps using toolbar mouse input, tests Rust F-keys, C++ launch, pause/continue,
+toolbar hiding, resizing and tab changes, project launch JSON, failed-launch
+cleanup, and session exclusion. It also prints Linux PSS measurements for
+Neovim and its child processes before/during/after debugging (excluding Kitty).
+Use the complete discovery command without `-p` to run all suites together.
+
 For a full networked installation test without changing your real config:
 
 ```sh

@@ -53,10 +53,10 @@ Optional tools:
 Close running Neovim instances, then:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.3.0/install.sh | bash
 ```
 
-This uses the tagged **v0.2.0** configuration. Downloaded shell code runs with your
+This uses the tagged **v0.3.0** configuration. Downloaded shell code runs with your
 user permissions. To inspect it first, use the checkout method below.
 
 The installer:
@@ -66,7 +66,7 @@ The installer:
 3. Backs up existing Neovim config, data, state, and cache (including symlinks).
 4. Copies `nvim/` into the active Neovim configuration directory.
 5. Installs plugins at `lazy-lock.json` revisions using Lazy restore.
-6. Installs language servers, formatters, and syntax parsers synchronously.
+6. Installs language servers, formatters, CodeLLDB, and syntax parsers synchronously.
 
 It prints the backup directory. Do not run it while another Neovim session is
 writing these directories. If tool setup fails, the backup is retained and the
@@ -75,7 +75,7 @@ script returns a nonzero status. See [failure recovery](TROUBLESHOOTING.md#insta
 ## Inspectable checkout install
 
 ```sh
-git clone --branch v0.2.0 https://github.com/dejely/dejelys-nvim.git
+git clone --branch v0.3.0 https://github.com/dejely/dejelys-nvim.git
 cd dejelys-nvim
 less install.sh
 bash install.sh --source "$PWD"
@@ -152,10 +152,10 @@ Re-running the installer makes another backup and replaces the config and plugin
 directories with a fresh copy. It preserves the previous undo history in that
 backup rather than merging it into the new installation.
 
-For a future release, change both `v0.2.0` occurrences (URL and ref):
+For a future release, change both `v0.3.0` occurrences (URL and ref):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | NVIM_SETUP_REF=v0.2.0 bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.3.0/install.sh | NVIM_SETUP_REF=v0.3.0 bash
 ```
 
 To intentionally try the development branch:

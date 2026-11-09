@@ -18,12 +18,23 @@ discover leader shortcuts. Press **Esc** to close it.
 
 </details>
 
+<details>
+<summary>Compact debugging toolbar</summary>
+
+![Rust program paused at a breakpoint with the compact debug toolbar](docs/screenshots/debugging.png)
+
+Debug Rust, C, and C++ with a floating toolbar. It stays near the top while
+debugging; variables and output open only when requested. See the
+[debugging guide](docs/DEBUGGING.md).
+
+</details>
+
 ## Install
 
 On Linux or macOS, install the [prerequisites](docs/INSTALL.md#prerequisites), then run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.3.0/install.sh | bash
 ```
 
 The installer backs up your existing Neovim config, plugins, state, and cache.
@@ -66,6 +77,8 @@ Most shortcuts use normal mode; press `Esc` first.
 | `Ctrl+O`, then `u` | Undo while typing, then return to insert mode |
 | `Space s s` / `Space s r` | Save / restore the current directory's session |
 | `Space s d` | Stop session autosave until restart |
+| `F5` / `F10` / `F11` | Start or continue / step over / step into |
+| `Space b b` / `Space b u` | Toggle breakpoint / debug toolbar |
 
 The [complete shortcut guide](docs/SHORTCUTS.md) covers movement, selection,
 copy/paste, buffers, actual Vim tab pages, completion, diagnostics, Git, terminals,
@@ -96,6 +109,7 @@ fresh shell; running jobs and unsaved file contents are not saved. See the
 - Project indentation through `.editorconfig`; manual formatting with project formatter settings.
 - Persistent undo under Neovim's state directory.
 - Per-directory sessions and which-key shortcut discovery on Ctrl+H or after pausing on Space.
+- On-demand Rust/C/C++ debugging through CodeLLDB, with a clickable floating toolbar.
 - Syntax parsers for Rust, JS/TS/TSX, Python, JSON/JSONC, Lua, Vimscript, Markdown, Bash, HTML, CSS, and YAML.
 - Plugin revisions recorded in `nvim/lazy-lock.json`.
 
@@ -112,6 +126,8 @@ or CAD environment handling. A Nerd Font is optional but improves file icons.
 | `lua/config/workspace.lua` | Startup layout and remembered directory |
 | `lua/config/sessions.lua` | Per-directory session save/restore and controls |
 | `lua/config/shortcuts.lua` | Shortcut popup and leader-key groups |
+| `lua/config/debugging.lua` | Debugger adapter, launch defaults, and shortcuts |
+| `lua/config/debug_toolbar.lua` | Floating toolbar and variable inspector |
 | `lua/config/explorer.lua` | Explorer filters and actions |
 | `lua/config/lsp.lua` | Language servers and diagnostics |
 | `lua/config/completion.lua` | Completion keys and sources |

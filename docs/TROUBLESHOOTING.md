@@ -1,5 +1,8 @@
 # Troubleshooting
 
+For debugger setup, breakpoints, executable selection, output, and F-key issues,
+see [Debugging](DEBUGGING.md#troubleshooting).
+
 ## Ctrl+period and Ctrl+comma
 
 The top bar is Bufferline, and its shortcuts use `BufferLineCycleNext` and

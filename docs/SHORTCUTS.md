@@ -221,6 +221,26 @@ Formatting is manual. If no external formatter is configured, Conform attempts
 LSP formatting if the attached server supports it. Selection formatting depends
 on the formatter's range support.
 
+## Debugging
+
+Rust, C, and C++ debugging is available on demand. Build with debug symbols first,
+set a breakpoint, then use F5. See [DEBUGGING.md](DEBUGGING.md) for launch settings.
+
+| Keys (normal mode) | Action |
+| --- | --- |
+| `F5` | Start / continue |
+| `F10` / `F11` / `Shift+F11` | Step over / into / out |
+| `Space b b` / `Space b c` | Toggle / conditional breakpoint |
+| `Space b p` | Pause |
+| `Space b u` | Toggle compact floating toolbar |
+| `Space b v` / `Space b e` | Floating variables / expression inspection |
+| `Space b r` | Toggle debug output / REPL |
+| `Space b q` | Stop debugger |
+
+The top toolbar is clickable, stays visible during debugging, and closes when
+the session ends. Larger views open only when requested. Ctrl+H still opens
+shortcut discovery; the Debug group lives under Space b.
+
 ## Git
 
 These keys appear in buffers attached to a Git repository through gitsigns.

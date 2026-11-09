@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPOSITORY=https://github.com/dejely/dejelys-nvim.git
-ref=${NVIM_SETUP_REF:-v0.2.0}
+ref=${NVIM_SETUP_REF:-v0.3.0}
 source_dir=
 skip_bootstrap=0
 while [[ $# -gt 0 ]]; do
@@ -13,7 +13,7 @@ while [[ $# -gt 0 ]]; do
       echo 'Usage: bash install.sh [--source CHECKOUT] [--skip-bootstrap]'
       echo 'Installs config, backs up old config/data/state/cache, and bootstraps tools.'
       echo '--skip-bootstrap only copies config; it skips binaries, plugins and tools.'
-      echo 'NVIM_SETUP_REF selects a tag or branch (default: v0.2.0).'
+      echo 'NVIM_SETUP_REF selects a tag or branch (default: v0.3.0).'
       exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
