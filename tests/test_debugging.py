@@ -109,11 +109,46 @@ class DebugTests(unittest.TestCase):
         self.wait("require('dap').session() == nil")
         self.assertIsNone(self.nvim.exec_lua("return require('config.debug_toolbar').win"))
 
+    def test_variables_refresh_in_same_window_after_each_step(self):
+        self.launch_debugger(*self.fixture())
+        self.nvim.exec_lua("require('config.debugging').action('scopes')")
+        self.wait("table.concat(vim.api.nvim_buf_get_lines(require('config.debug_toolbar').scope_view.buf,0,-1,false),'\\n'):find('banana: 40',1,true) ~= nil")
+        window = self.nvim.exec_lua("return require('config.debug_toolbar').scope_view.win")
+        buffer = self.nvim.exec_lua("return require('config.debug_toolbar').scope_view.buf")
+        self.nvim.input('<F10>')
+        self.wait("require('dap').session().current_frame ~= nil and require('dap').session().current_frame.line == 5")
+        self.wait("table.concat(vim.api.nvim_buf_get_lines(require('config.debug_toolbar').scope_view.buf,0,-1,false),'\\n'):find('banana: 42',1,true) ~= nil", 3000)
+        self.assertEqual(self.nvim.exec_lua("return require('config.debug_toolbar').scope_view.win"), window)
+        self.assertEqual(self.nvim.exec_lua("return require('config.debug_toolbar').scope_view.buf"), buffer)
+        self.nvim.exec_lua("require('config.debugging').action('stop')")
+        self.wait("require('dap').session() == nil")
+        self.assertIsNone(self.nvim.exec_lua("return require('config.debug_toolbar').scope_view"))
+
     def test_cpp_breakpoint(self):
         if not shutil.which('c++'):
             self.skipTest('C++ compiler unavailable')
         self.launch_debugger(*self.fixture('cpp'))
         self.assertEqual(self.value(), '40')
+        self.nvim.exec_lua("require('config.debugging').action('stop')")
+        self.wait("require('dap').session() == nil")
+
+    def test_expanded_object_values_refresh_across_steps(self):
+        source = self.h.project / 'inventory.c'
+        executable = self.h.project / 'inventory'
+        source.write_text('#include <stdio.h>\nstruct Stock { int bananas; int sold; };\nint main(void) {\n    struct Stock inventory = {40, 0};\n    inventory.bananas -= 5;\n    inventory.sold += 5;\n    printf("%d %d\\n", inventory.bananas, inventory.sold);\n    return 0;\n}\n')
+        subprocess.run(['cc', '-g', '-O0', str(source), '-o', str(executable)], check=True, capture_output=True)
+        self.launch_debugger(source, executable, 5)
+        self.nvim.exec_lua("require('config.debugging').action('scopes')")
+        self.wait("table.concat(vim.api.nvim_buf_get_lines(require('config.debug_toolbar').scope_view.buf,0,-1,false),'\\n'):find('inventory:',1,true) ~= nil")
+        self.nvim.exec_lua("local v=require('config.debug_toolbar').scope_view; for row,text in ipairs(vim.api.nvim_buf_get_lines(v.buf,0,-1,false)) do if text:find('inventory:',1,true) then vim.api.nvim_set_current_win(v.win); vim.api.nvim_win_set_cursor(v.win,{row,0}); break end end")
+        self.nvim.input('<CR>')
+        def fields(bananas, sold):
+            return "(function() local lines=vim.api.nvim_buf_get_lines(require('config.debug_toolbar').scope_view.buf,0,-1,false); local b,s=false,false; for _,line in ipairs(lines) do b=b or line:match('^%s+bananas: " + str(bananas) + "$')~=nil; s=s or line:match('^%s+sold: " + str(sold) + "$')~=nil end; return b and s end)()"
+        self.wait(fields(40, 0))
+        self.nvim.input('<F10>')
+        self.wait(fields(35, 0))
+        self.nvim.input('<F10>')
+        self.wait(fields(35, 5))
         self.nvim.exec_lua("require('config.debugging').action('stop')")
         self.wait("require('dap').session() == nil")
 

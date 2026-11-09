@@ -69,6 +69,12 @@ interactive stdin. For an interactive program, set `terminal` to `"integrated"`
 in its launch configuration; a separate debug terminal then handles its input.
 Your ordinary bottom shell is independent of the debugger.
 
+Open variables once with **Space b v** and leave the window open while using
+F10/F11 or the toolbar. Its values refresh automatically after every step or
+breakpoint, including expanded object fields. Expanded objects stay expanded;
+you do not need to close and reopen the window to see new values. Values reflect
+the current paused stack frame, rather than continuously updating while running.
+
 ## Project-specific configuration
 
 nvim-dap automatically reads `.vscode/launch.json` in the working directory.

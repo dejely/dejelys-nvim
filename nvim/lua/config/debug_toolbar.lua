@@ -72,6 +72,7 @@ function M.scopes()
   if M.scope_view then M.scope_view.close(); M.scope_view = nil; return end
   local widgets = require('dap.ui.widgets')
   M.scope_view = widgets.builder(widgets.scopes)
+    .new_buf(widgets.with_refresh(widgets.scopes.new_buf, 'scopes'))
     .new_win(function(buf)
       local win = vim.api.nvim_open_win(buf, true, { relative = 'editor',
         width = math.max(1, math.min(70, vim.o.columns - 4)),

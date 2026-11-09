@@ -240,6 +240,8 @@ set a breakpoint, then use F5. See [DEBUGGING.md](DEBUGGING.md) for launch setti
 The top toolbar is clickable, stays visible during debugging, and closes when
 the session ends. Larger views open only when requested. Ctrl+H still opens
 shortcut discovery; the Debug group lives under Space b.
+Leave the variables window open after Space b v: it refreshes after each step
+and breakpoint, preserving expanded objects.
 
 ## Git
 
