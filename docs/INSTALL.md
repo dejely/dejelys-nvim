@@ -53,10 +53,10 @@ Optional tools:
 Close running Neovim instances, then:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.1.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | bash
 ```
 
-This uses the tagged **v0.1.0** configuration. Downloaded shell code runs with your
+This uses the tagged **v0.2.0** configuration. Downloaded shell code runs with your
 user permissions. To inspect it first, use the checkout method below.
 
 The installer:
@@ -75,7 +75,7 @@ script returns a nonzero status. See [failure recovery](TROUBLESHOOTING.md#insta
 ## Inspectable checkout install
 
 ```sh
-git clone --branch v0.1.0 https://github.com/dejely/dejelys-nvim.git
+git clone --branch v0.2.0 https://github.com/dejely/dejelys-nvim.git
 cd dejelys-nvim
 less install.sh
 bash install.sh --source "$PWD"
@@ -101,6 +101,7 @@ or a machine with a separately managed toolchain, not an offline full install.
 | Config | `~/.config/nvim` |
 | Plugins, Mason tools, parsers | `~/.local/share/nvim` |
 | Undo and last-directory state | `~/.local/state/nvim` |
+| Saved project sessions | `~/.local/state/nvim/sessions` |
 | Cache | `~/.cache/nvim` |
 | Installer backups | `~/.local/state/dejelys-nvim/backups/<timestamp>.<unique suffix>` |
 | Downloaded Neovim | `~/.local/opt/dejelys-nvim/nvim-v0.12.6.<unique suffix>` |
@@ -151,10 +152,10 @@ Re-running the installer makes another backup and replaces the config and plugin
 directories with a fresh copy. It preserves the previous undo history in that
 backup rather than merging it into the new installation.
 
-For a future release, change both `v0.1.0` occurrences (URL and ref):
+For a future release, change both `v0.2.0` occurrences (URL and ref):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.1.0/install.sh | NVIM_SETUP_REF=v0.1.0 bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | NVIM_SETUP_REF=v0.2.0 bash
 ```
 
 To intentionally try the development branch:

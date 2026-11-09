@@ -27,6 +27,27 @@ For Lua, config files use the Neovim config directory as the workspace root.
 Other Lua projects look for .luarc.json, .luarc.jsonc, or .git and avoid selecting
 the home directory as their workspace.
 
+## Shortcut popup does not appear
+
+Use normal mode (Esc) and try Ctrl+H or Space ?. Pausing after Space also opens
+leader-key hints. Check `:verbose nmap <C-h>` and `:Lazy` for which-key.nvim.
+If the terminal intercepts Ctrl+H or sends it as Backspace, Space ? is the
+alternative. This binding deliberately does not apply in insert or terminal
+input mode, where Ctrl+H normally erases a character.
+
+## Session did not restore
+
+Start with `nvim` or `nvim /path/to/project`. Explicit file arguments, diff mode,
+piped stdin, headless invocations, and external `-S` sessions bypass the automatic
+session flow. Run `:pwd`: sessions are selected by the current working directory.
+Use Space s s to save manually, then restart or use Space s r to restore. Save
+or discard modified buffers before a manual restore.
+
+The bottom terminal restarts its shell rather than replaying jobs. Unsaved text
+is not session data. SessionStop prevents autosaving only until the next launch.
+Headless checks never autosave. Two interactive editors using the same project
+share its session file; the last one to exit writes the most recent layout.
+
 ## Formatting does nothing
 
 Use `:ConformInfo` to see the selected formatter, executable path, and log.

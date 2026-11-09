@@ -23,6 +23,7 @@ with `:` finish with Enter. Space is the configured leader key.
 | `Ctrl+P`, `Space f f` | Normal | Find project files |
 | `Space f g` | Normal | Search file contents with ripgrep |
 | `Space f b` | Normal | Pick an open buffer |
+| `Ctrl+H` / `Space ?` | Normal | Show shortcut discovery popup |
 | `Ctrl+.` / `Ctrl+,` | Normal, insert, terminal input | Next / previous Bufferline tab |
 | `Ctrl+^` (often `Ctrl+Shift+6`) | Normal | Alternate between current and previous file |
 | `:edit path/to/file` | Normal | Open a file; use Tab for path completion |
@@ -52,6 +53,50 @@ Neovim's buffer order; Ctrl+period/comma follows Bufferline's visible order.
 
 The punctuation shortcuts require a terminal that transmits these Ctrl key
 combinations. See [terminal troubleshooting](TROUBLESHOOTING.md#ctrlperiod-and-ctrlcomma).
+
+## Shortcut discovery
+
+In normal mode, **Ctrl+H** opens the which-key popup immediately; **Space ?** is
+an alternative. Press **Esc** to dismiss it. Press a shown key to continue into
+its group or execute the mapping. Press **Space** and pause for about 350 ms to
+discover leader shortcuts, grouped into files/formatting, sessions, refactoring,
+code, diagnostics, and Git changes. Available language/Git mappings depend on
+the current buffer.
+
+Ctrl+H is mapped only in normal mode, preserving backspace while typing and in
+terminal shells. Use Esc first when typing in a file; from terminal input, use
+Ctrl+backslash then Ctrl+N first. Some terminals send the same code for Backspace
+and Ctrl+H; if normal-mode Backspace opens the popup, use Space ? and remap Ctrl+H.
+
+## Sessions
+
+| Keys / command | Action |
+| --- | --- |
+| `Space s s` / `:SessionSave` | Save the current working directory's session |
+| `Space s r` / `:SessionRestore` | Restore its saved session |
+| `Space s d` / `:SessionStop` | Stop autosaving until Neovim restarts |
+
+Session keys use normal mode. An interactive `nvim` or `nvim path/to/directory`
+restores automatically and saves on exit. Sessions include named file buffers,
+cursor positions, editor splits, folds, and Vim tab pages. Storage is under
+`stdpath('state')/sessions`, keyed by a hash of the working directory. Each
+directory gets its own session; symlink paths to the same directory share one.
+
+The explorer is rebuilt and the bottom shell is fresh after a restart. A manual
+restore in the same running Neovim reuses its existing bottom terminal. Shell
+jobs, terminal contents, unnamed buffers, unsaved file contents, popup windows,
+and plugin settings are not session data. Save edits normally before closing;
+sessions do not replace saving files or backups. An empty session with no named
+file buffers does not replace a saved session.
+
+Explicit file arguments, diff mode, piped stdin, headless runs, and external
+`-S` sessions bypass automatic restoration and autosaving. Manual restore
+refuses while any buffer has unsaved changes. SessionStop pauses autosaving
+only; it leaves the previous saved session available on the next launch.
+
+Use a consistent project directory (`:pwd` / `:cd`) so the expected session is
+selected. Sessions contain file paths and native Vim session commands and stay
+in your local state directory; they are not committed to this repository.
 
 ## File explorer
 

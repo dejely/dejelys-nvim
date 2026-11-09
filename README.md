@@ -8,7 +8,7 @@ completion, language servers, formatting, and a dark Catppuccin theme.
 On Linux or macOS, install the [prerequisites](docs/INSTALL.md#prerequisites), then run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.1.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dejely/dejelys-nvim/v0.2.0/install.sh | bash
 ```
 
 The installer backs up your existing Neovim config, plugins, state, and cache.
@@ -39,6 +39,7 @@ Most shortcuts use normal mode; press `Esc` first.
 | `Space f b` | Choose an open file |
 | `Ctrl+.` / `Ctrl+,` | Next / previous tab in the top bar |
 | `Ctrl+N` | Toggle the file explorer |
+| `Ctrl+H` or `Space ?` | Show available shortcuts (normal mode) |
 | `Space e` | Reveal the current file in the explorer |
 | `Ctrl+W`, then `h/j/k/l` | Focus left/down/up/right window |
 | `Space f m` | Format the file or selection |
@@ -48,6 +49,8 @@ Most shortcuts use normal mode; press `Esc` first.
 | `:w` / `:q` | Save / close a window (press Enter) |
 | `u` / `Ctrl+R` | Undo / redo |
 | `Ctrl+O`, then `u` | Undo while typing, then return to insert mode |
+| `Space s s` / `Space s r` | Save / restore the current directory's session |
+| `Space s d` | Stop session autosave until restart |
 
 The [complete shortcut guide](docs/SHORTCUTS.md) covers movement, selection,
 copy/paste, buffers, actual Vim tab pages, completion, diagnostics, Git, terminals,
@@ -57,10 +60,16 @@ language tools, clipboard support, and installation failures.
 ## What opens
 
 The explorer appears on the left, your shell opens in a small bottom split, and
-focus starts in the editor. That layout is skipped for headless runs, piped input,
-diff mode, and restored sessions. Launch with `nvim path/to/project` or
-`nvim path/to/file`. With no argument, the last interactive working directory is
-restored; open files and shell history are not restored.
+focus starts in the editor. Launch with `nvim path/to/project` to restore that
+directory's saved files, cursor positions, splits, and Vim tab pages. With no
+argument, Neovim returns to the last interactive directory and restores its
+session. Sessions save automatically on normal exit.
+
+`nvim path/to/file` opens the requested file without restoring or overwriting the
+directory's saved session. Headless runs, piped input, diff mode, and externally
+restored sessions skip the automatic layout/session flow. The terminal starts a
+fresh shell; running jobs and unsaved file contents are not saved. See the
+[session guide](docs/SHORTCUTS.md#sessions) for manual controls and details.
 
 ## Included
 
@@ -71,6 +80,7 @@ restored; open files and shell history are not restored.
 - StyLua, Prettier, Ruff, and optional rustfmt formatting through Conform.
 - Project indentation through `.editorconfig`; manual formatting with project formatter settings.
 - Persistent undo under Neovim's state directory.
+- Per-directory sessions and which-key shortcut discovery on Ctrl+H or after pausing on Space.
 - Syntax parsers for Rust, JS/TS/TSX, Python, JSON/JSONC, Lua, Vimscript, Markdown, Bash, HTML, CSS, and YAML.
 - Plugin revisions recorded in `nvim/lazy-lock.json`.
 
@@ -85,6 +95,8 @@ or CAD environment handling. A Nerd Font is optional but improves file icons.
 | `~/.config/nvim/init.lua` | Leader key and plugin bootstrap |
 | `lua/config/options.lua` | Editor settings and tab shortcuts |
 | `lua/config/workspace.lua` | Startup layout and remembered directory |
+| `lua/config/sessions.lua` | Per-directory session save/restore and controls |
+| `lua/config/shortcuts.lua` | Shortcut popup and leader-key groups |
 | `lua/config/explorer.lua` | Explorer filters and actions |
 | `lua/config/lsp.lua` | Language servers and diagnostics |
 | `lua/config/completion.lua` | Completion keys and sources |

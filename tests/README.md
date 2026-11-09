@@ -12,6 +12,22 @@ installation, four-directory backups, symlink preservation, repeated runs,
 restore, overlapping XDG paths, and invalid arguments. They do not download
 plugins or binaries. Python is needed only for tests, not installation.
 
+For real embedded-UI session and shortcut checks, install the config's locked
+plugins first, then run with pynvim (or use `uv run --with pynvim`):
+
+```sh
+NVIM_TEST_PLUGIN_DIR="$HOME/.local/share/nvim/lazy" \
+  uv run --with pynvim python -m unittest discover -s tests -p test_sessions.py -v
+```
+
+These tests create isolated config/state directories and attach a real Neovim
+UI over RPC. They reuse installed plugin/tool directories, and verify session
+restart, files/splits/tab pages/cursors, last directory, terminal recreation,
+explicit-file behavior, per-directory isolation, modified-buffer refusal,
+headless isolation, autosave stopping, and the Ctrl+H/Space popup. The optional
+suite is skipped when pynvim or NVIM_TEST_PLUGIN_DIR is absent. It tests input
+at Neovim's API boundary, not physical key transmission through your terminal.
+
 For a full networked installation test without changing your real config:
 
 ```sh
