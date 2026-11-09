@@ -74,6 +74,10 @@ F10/F11 or the toolbar. Its values refresh automatically after every step or
 breakpoint, including expanded object fields. Expanded objects stay expanded;
 you do not need to close and reopen the window to see new values. Values reflect
 the current paused stack frame, rather than continuously updating while running.
+Close it with **Space b v**, **Esc**, or **q** to return to the paused source
+window. Closing variables does not continue the program: use **F10/F11** to step
+or **F5** to resume. While the program is running, variables and stepping ask you
+to pause or hit a breakpoint first.
 
 ## Project-specific configuration
 

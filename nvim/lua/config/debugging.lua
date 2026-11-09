@@ -81,6 +81,12 @@ function M.action(action)
   elseif not dap.session() then vim.notify('Start debugging with F5 first', vim.log.levels.INFO)
   elseif action == 'scopes' then require('config.debug_toolbar').scopes()
   elseif action == 'hover' then require('dap.ui.widgets').hover()
+  elseif action == 'step_over' or action == 'step_into' or action == 'step_out' then
+    if not dap.session().stopped_thread_id then
+      vim.notify('Program is running. Pause or hit a breakpoint before stepping.', vim.log.levels.INFO)
+      return
+    end
+    dap[action]()
   else dap[action]() end
 end
 
