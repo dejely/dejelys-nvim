@@ -2,7 +2,7 @@
 local registry = require('mason-registry')
 local tools = {
   'typescript-language-server', 'pyright', 'json-lsp', 'lua-language-server',
-  'stylua', 'prettier', 'ruff',
+  'stylua', 'prettier', 'ruff', 'codelldb',
 }
 local refresh_done, refresh_ok = false, false
 registry.refresh(function(ok)
@@ -31,4 +31,4 @@ local installed = require('nvim-treesitter').get_installed()
 for _, parser in ipairs(parsers) do
   assert(vim.tbl_contains(installed, parser), 'Parser installation failed: ' .. parser)
 end
-print('Language servers, formatters, and syntax parsers installed.')
+print('Language servers, formatters, CodeLLDB, and syntax parsers installed.')

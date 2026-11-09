@@ -1,4 +1,8 @@
 return {
+  { 'mfussenegger/nvim-dap', lazy = true,
+    keys = require('config.debugging').keys(),
+    cmd = { 'DapContinue', 'DapToggleBreakpoint', 'DapTerminate', 'DapShowLog' },
+    config = function() require('config.debugging').setup() end },
   { 'folke/which-key.nvim',
     config = function() require('config.shortcuts').setup() end },
   { 'stevearc/conform.nvim',

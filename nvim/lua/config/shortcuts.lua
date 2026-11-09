@@ -5,6 +5,7 @@ function M.setup()
     preset = 'modern',
     delay = 350,
     spec = {
+      { '<leader>b', group = 'Debug' },
       { '<leader>f', group = 'Files and formatting' },
       { '<leader>s', group = 'Sessions' },
       { '<leader>r', group = 'Refactor' },
