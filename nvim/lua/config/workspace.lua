@@ -19,31 +19,33 @@ local function save_directory()
   if vim.fn.writefile({ directory }, temporary) == 0 then
     vim.fn.rename(temporary, directory_file)
   end
+  local sessions = require('config.sessions')
+  if M.session_enabled and sessions.autosave then
+    local ok, err = sessions.save()
+    if not ok and err ~= 'No named file buffers to save' then vim.notify(err, vim.log.levels.WARN) end
+  end
 end
 
-function M.open()
-  if M.reading_stdin or vim.o.diff or vim.v.this_session ~= '' or M.opened then
-    return
-  end
-  M.opened = true
-  restore_directory()
-  local path = vim.fn.argc() == 1 and vim.fn.argv(0) or nil
-  if path and vim.fn.isdirectory(path) == 1 then
-    path = vim.fn.fnamemodify(path, ':p')
-    vim.cmd.enew()
-    vim.api.nvim_set_current_dir(path)
-  end
+local function layout()
   local editor = vim.api.nvim_get_current_win()
   require('nvim-tree.api').tree.open({ focus = false })
   vim.api.nvim_set_current_win(editor)
   vim.cmd('botright 10new')
-  local terminal = vim.api.nvim_get_current_buf()
   local win = vim.api.nvim_get_current_win()
   vim.wo[win].number = false
   vim.wo[win].relativenumber = false
   vim.wo[win].signcolumn = 'no'
   vim.wo[win].cursorline = false
   vim.wo[win].winfixheight = true
+  if M.terminal_buf and vim.api.nvim_buf_is_valid(M.terminal_buf) then
+    local blank = vim.api.nvim_get_current_buf()
+    vim.api.nvim_win_set_buf(0, M.terminal_buf)
+    vim.api.nvim_buf_delete(blank, { force = true })
+    vim.api.nvim_set_current_win(editor)
+    vim.cmd.stopinsert()
+    return
+  end
+  local terminal = vim.api.nvim_get_current_buf()
   M.terminal_buf = terminal
   vim.fn.jobstart({ vim.o.shell }, {
     term = true,
@@ -64,6 +66,33 @@ function M.open()
   })
   vim.api.nvim_set_current_win(editor)
   vim.cmd.stopinsert()
+end
+
+function M.restore_session()
+  local ok, err = require('config.sessions').restore()
+  if not ok then return false, err end
+  layout()
+  M.opened, M.session_enabled = true, true
+  return true
+end
+
+function M.open()
+  if M.reading_stdin or vim.o.diff or vim.v.this_session ~= '' or M.opened then return end
+  M.opened = true
+  restore_directory()
+  local path = vim.fn.argc() == 1 and vim.fn.argv(0) or nil
+  local directory_argument = path and vim.fn.isdirectory(path) == 1
+  M.session_enabled = vim.fn.argc() == 0 or directory_argument
+  if directory_argument then
+    path = vim.fn.fnamemodify(path, ':p')
+    vim.cmd.enew()
+    vim.api.nvim_set_current_dir(path)
+  end
+  if M.session_enabled then
+    local ok, err = require('config.sessions').restore()
+    if not ok and err ~= 'No session saved for this directory' then vim.notify(err, vim.log.levels.WARN) end
+  end
+  layout()
 end
 
 function M.setup()

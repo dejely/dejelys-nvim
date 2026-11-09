@@ -17,4 +17,5 @@ require('lazy').setup('plugins', {
   checker = { enabled = false },
   rocks = { enabled = false },
 })
+require('config.sessions').setup()
 require('config.workspace').setup()
