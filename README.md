@@ -3,6 +3,21 @@
 A Neovim setup with a file explorer, searchable files, a bottom terminal,
 completion, language servers, formatting, and a dark Catppuccin theme.
 
+![Neovim with the project explorer, open Lua files, buffer tabs, and bottom terminal](docs/screenshots/layout.png)
+
+The actual setup editing its own configuration. Terminal font and shell prompt
+come from my local terminal settings; the installer leaves yours unchanged.
+
+<details>
+<summary>Shortcut discovery with Ctrl+H</summary>
+
+![The which-key popup showing available normal-mode shortcuts over the editor](docs/screenshots/shortcuts.png)
+
+Press **Ctrl+H** in normal mode to open this guide, or pause after **Space** to
+discover leader shortcuts. Press **Esc** to close it.
+
+</details>
+
 ## Install
 
 On Linux or macOS, install the [prerequisites](docs/INSTALL.md#prerequisites), then run:
