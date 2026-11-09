@@ -30,6 +30,19 @@ For Lua, config files use the Neovim config directory as the workspace root.
 Other Lua projects look for .luarc.json, .luarc.jsonc, or .git and avoid selecting
 the home directory as their workspace.
 
+### Rust standard-library manifest errors
+
+An error mentioning `public-dependency`, stable Cargo, and a path such as
+`lib/rustlib/src/rust/library/alloc/Cargo.toml` can occur when standard-library
+source is mistakenly treated as a standalone Cargo project. Those internal
+manifests use unstable Cargo features even in a stable toolchain.
+
+Standard-library files now reuse an existing Rust project client. Open your
+project first, then use go-to-definition into the standard library. If opened
+on their own, library source files do not start a separate rust-analyzer
+workspace. Reopen Neovim after updating this configuration. This fix does not
+change your Rust toolchain or enable unstable features for your project.
+
 ## Shortcut popup does not appear
 
 Use normal mode (Esc) and try Ctrl+H or Space ?. Pausing after Space also opens
