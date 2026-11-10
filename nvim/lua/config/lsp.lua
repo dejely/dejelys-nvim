@@ -17,7 +17,8 @@ function M.setup()
   vim.lsp.config('*', { capabilities = require('cmp_nvim_lsp').default_capabilities() })
   local rust_analyzer = vim.fn.exepath('rust-analyzer')
   if rust_analyzer ~= '' then
-    vim.lsp.config('rust_analyzer', { cmd = { rust_analyzer } })
+    vim.lsp.config('rust_analyzer', { cmd = { rust_analyzer },
+      root_dir = require('config.rust_root').wrap(vim.lsp.config.rust_analyzer.root_dir) })
   end
   vim.lsp.config('lua_ls', {
     root_dir = function(buf, on_dir)
