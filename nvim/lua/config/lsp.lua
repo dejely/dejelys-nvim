@@ -1,7 +1,7 @@
 local M = {}
 function M.setup()
   vim.diagnostic.config({
-    virtual_text = false,
+    virtual_text = true,
     virtual_lines = false,
     update_in_insert = false,
     severity_sort = true,
