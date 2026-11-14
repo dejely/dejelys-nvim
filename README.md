@@ -143,3 +143,15 @@ your setup. For development checks, see [tests/README.md](tests/README.md).
 
 MIT for the configuration and installer. Plugins and downloaded tools retain
 their own licenses; their source repositories are linked in the plugin declarations.
+
+## Lightweight editor workflow
+
+Use Ctrl+Shift+P (or Space f p) for commands, Space f k for keybindings,
+Space d x for project diagnostics, and Ctrl+backtick (or Space f t) to toggle
+the existing terminal without stopping its shell. Ctrl+S saves; with an LSP
+attached, F2 renames, F12 jumps to definitions, and Alt+Enter opens code actions.
+
+Completion, formatting, pickers, and file tools load on demand. Large files
+(above 1 MiB or lines longer than 10,000 bytes) automatically skip expensive
+highlighting, indentation guides, buffer-word indexing, and LSP attachment.
+See [the shortcut guide](docs/SHORTCUTS.md) for behavior and fallback mappings.

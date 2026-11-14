@@ -1,11 +1,14 @@
 return {
   { 'mfussenegger/nvim-dap', lazy = true,
+    dependencies = { { 'mason-org/mason.nvim', opts = {} } },
     keys = require('config.debugging').keys(),
     cmd = { 'DapContinue', 'DapToggleBreakpoint', 'DapTerminate', 'DapShowLog' },
     config = function() require('config.debugging').setup() end },
-  { 'folke/which-key.nvim',
+  { 'folke/which-key.nvim', event = 'VeryLazy',
     config = function() require('config.shortcuts').setup() end },
-  { 'stevearc/conform.nvim',
+  { 'stevearc/conform.nvim', cmd = { 'ConformInfo' },
+    keys = { { '<leader>fm', function() require('conform').format({ async = true, lsp_format = 'fallback' }) end,
+      mode = { 'n', 'v' }, desc = 'Format file or selection' } },
     config = function() require('config.formatting').setup() end },
   { 'catppuccin/nvim', name = 'catppuccin', priority = 1000,
     config = function() require('config.theme').setup() end },
@@ -20,19 +23,21 @@ return {
   { 'nvim-tree/nvim-tree.lua', dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function() require('config.explorer').setup() end },
   { 'ibhagwan/fzf-lua', dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-      local fzf = require('fzf-lua')
-      fzf.setup({ winopts = { split = 'botright new', height = 0.4 } })
-      for key, action in pairs({ ['<C-p>'] = 'files', ['<leader>ff'] = 'files',
-        ['<leader>fb'] = 'buffers', ['<leader>fg'] = 'live_grep' }) do
-        vim.keymap.set('n', key, fzf[action], { desc = action })
+    keys = require('config.pickers').keys(), cmd = { 'FzfLua', 'Files', 'Buffers', 'Rg' },
+    init = function()
+      local select = vim.ui.select
+      vim.ui.select = function(items, opts, callback)
+        vim.ui.select = select
+        require('fzf-lua') -- Loading registers the actual selection handler.
+        return vim.ui.select(items, opts, callback)
       end
-      for name, action in pairs({ Files = 'files', Buffers = 'buffers', Rg = 'live_grep' }) do
-        vim.api.nvim_create_user_command(name, function() fzf[action]() end, {})
-      end
-    end },
-  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl',
+    end,
+    config = function() require('config.pickers').setup() end },
+  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', event = { 'BufReadPost', 'BufNewFile' }, cmd = { 'IBLToggle' },
+    keys = { { '<leader>i', '<cmd>IBLToggle<CR>', desc = 'Toggle indentation guides' } },
     config = function()
+      local hooks = require('ibl.hooks')
+      hooks.register(hooks.type.ACTIVE, function(buf) return not require('config.large_files').is_large(buf) end)
       require('ibl').setup({ indent = { char = '│', highlight = 'IblIndent' },
         scope = { enabled = false }, exclude = {
           filetypes = { 'help', 'NvimTree', 'markdown', 'json', 'jsonc', 'lazy', 'mason' },
@@ -47,15 +52,11 @@ return {
       vim.api.nvim_create_autocmd('FileType', {
         group = vim.api.nvim_create_augroup('CustomTreesitter', { clear = true }),
         callback = function(event)
-          local lang = vim.treesitter.language.get_lang(vim.bo[event.buf].filetype)
-          if lang then
-            local ok, available = pcall(vim.treesitter.language.add, lang)
-            if ok and available then vim.treesitter.start(event.buf, lang) end
-          end
+          require('config.large_files').start_treesitter(event.buf)
         end,
       })
     end },
-  { 'lewis6991/gitsigns.nvim',
+  { 'lewis6991/gitsigns.nvim', event = { 'BufReadPost', 'BufNewFile' },
     config = function()
       local gs = require('gitsigns')
       gs.setup({ sign_priority = 5, signs = { add = { text = '+' }, change = { text = '~' },
@@ -66,9 +67,9 @@ return {
           vim.keymap.set('n', '<leader>hp', gs.preview_hunk, { buffer = buf, desc = 'Preview Git change' })
         end })
     end },
-  { 'hrsh7th/nvim-cmp', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer',
+  { 'hrsh7th/nvim-cmp', event = 'InsertEnter', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer',
     'hrsh7th/cmp-path' }, config = function() require('config.completion').setup() end },
-  { 'neovim/nvim-lspconfig', dependencies = { 'mason-org/mason.nvim',
+  { 'neovim/nvim-lspconfig', event = { 'BufReadPre', 'BufNewFile' }, dependencies = { 'mason-org/mason.nvim',
     'mason-org/mason-lspconfig.nvim', 'hrsh7th/cmp-nvim-lsp' },
     config = function() require('config.lsp').setup() end },
 }

@@ -20,7 +20,7 @@ class DebugTests(unittest.TestCase):
         os.environ['CARGO_HOME'] = self.h.original_env.get('CARGO_HOME', self.h.original_env['HOME'] + '/.cargo')
         self.addCleanup(self.h.doCleanups)
         self.nvim = self.h.launch(self.h.project)
-        if not self.nvim.exec_lua("return vim.fn.executable('codelldb') == 1"):
+        if not self.nvim.exec_lua("return vim.fn.executable('codelldb') == 1 or vim.fn.executable(vim.fn.stdpath('data') .. '/mason/bin/codelldb') == 1"):
             self.skipTest('Install CodeLLDB in Mason first')
 
     def wait(self, condition, timeout=15000):

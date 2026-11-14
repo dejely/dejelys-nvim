@@ -37,6 +37,9 @@ function M.setup()
     workspace = { library = { vim.env.VIMRUNTIME }, checkThirdParty = false },
     telemetry = { enable = false },
   } } })
+  for _, name in ipairs({ 'rust_analyzer', 'ts_ls', 'pyright', 'jsonls', 'lua_ls' }) do
+    vim.lsp.config(name, { root_dir = require('config.large_files').guard_root(vim.lsp.config[name]) })
+  end
   require('mason-lspconfig').setup({
     ensure_installed = { 'ts_ls', 'pyright', 'jsonls', 'lua_ls' },
     automatic_enable = { 'ts_ls', 'pyright', 'jsonls', 'lua_ls' },
@@ -48,6 +51,9 @@ function M.setup()
       local function map(key, action, desc)
         vim.keymap.set('n', key, action, { buffer = event.buf, desc = desc })
       end
+      vim.keymap.set({ 'n', 'i' }, '<F2>', vim.lsp.buf.rename, { buffer = event.buf, desc = 'Rename symbol' })
+      vim.keymap.set({ 'n', 'i' }, '<F12>', vim.lsp.buf.definition, { buffer = event.buf, desc = 'Go to definition' })
+      vim.keymap.set({ 'n', 'i' }, '<M-CR>', vim.lsp.buf.code_action, { buffer = event.buf, desc = 'Code action' })
       map('gd', vim.lsp.buf.definition, 'Go to definition')
       map('gr', vim.lsp.buf.references, 'Find references')
       map('K', vim.lsp.buf.hover, 'Documentation')

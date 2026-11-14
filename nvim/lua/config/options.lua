@@ -48,3 +48,5 @@ vim.keymap.set({ 'n', 'i' }, '<C-.>', '<cmd>BufferLineCycleNext<CR>', { desc = '
 vim.keymap.set({ 'n', 'i' }, '<C-,>', '<cmd>BufferLineCyclePrev<CR>', { desc = 'Previous tab' })
 vim.keymap.set('t', '<C-.>', [[<C-\><C-n><cmd>BufferLineCycleNext<CR>]], { desc = 'Next tab' })
 vim.keymap.set('t', '<C-,>', [[<C-\><C-n><cmd>BufferLineCyclePrev<CR>]], { desc = 'Previous tab' })
+
+vim.keymap.set({ 'n', 'i' }, '<C-s>', '<cmd>write<CR>', { desc = 'Save file' })

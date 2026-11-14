@@ -70,3 +70,15 @@ HOME="$test_home" XDG_CONFIG_HOME="$test_home/config" \
 If a compatible existing Neovim was reused, replace the executable path with
 `nvim`. These checks do not automate physical terminal key presses or visual UI
 acceptance. GitHub Actions runs the offline shell and installer tests only.
+
+Workflow checks use the same embedded-UI environment:
+
+```sh
+NVIM_TEST_PLUGIN_DIR="$HOME/.local/share/nvim/lazy" \
+  uv run --with pynvim python -m unittest discover -s tests -p test_workflow.py -v
+```
+
+They cover first-use loading, saving, command/Problems pickers, terminal job
+reuse and recreation, large-file and long-line guards, recovery after shrinking,
+and shared language-server attachment. Keyboard input uses Neovim's API; this
+does not verify physical key delivery through Kitty.
