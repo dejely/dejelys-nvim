@@ -24,7 +24,7 @@ class RustRootTests(unittest.TestCase):
 
     def run_lua(self, body):
         script = self.h.home / 'check-root.lua'
-        script.write_text(body)
+        script.write_text("require('lazy').load({plugins={'nvim-lspconfig'}})\n" + body)
         env = os.environ.copy()
         env['RUST_LIBRARY_TEST'] = str(self.library)
         env['RUST_ROOT_TEST'] = str(script)
