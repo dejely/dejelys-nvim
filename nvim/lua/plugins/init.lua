@@ -33,6 +33,8 @@ return {
     end },
   { 'lukas-reineke/indent-blankline.nvim', main = 'ibl',
     config = function()
+      local hooks = require('ibl.hooks')
+      hooks.register(hooks.type.ACTIVE, function(buf) return not require('config.large_files').is_large(buf) end)
       require('ibl').setup({ indent = { char = '│', highlight = 'IblIndent' },
         scope = { enabled = false }, exclude = {
           filetypes = { 'help', 'NvimTree', 'markdown', 'json', 'jsonc', 'lazy', 'mason' },
@@ -47,11 +49,7 @@ return {
       vim.api.nvim_create_autocmd('FileType', {
         group = vim.api.nvim_create_augroup('CustomTreesitter', { clear = true }),
         callback = function(event)
-          local lang = vim.treesitter.language.get_lang(vim.bo[event.buf].filetype)
-          if lang then
-            local ok, available = pcall(vim.treesitter.language.add, lang)
-            if ok and available then vim.treesitter.start(event.buf, lang) end
-          end
+          require('config.large_files').start_treesitter(event.buf)
         end,
       })
     end },

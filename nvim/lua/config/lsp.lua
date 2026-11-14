@@ -37,6 +37,9 @@ function M.setup()
     workspace = { library = { vim.env.VIMRUNTIME }, checkThirdParty = false },
     telemetry = { enable = false },
   } } })
+  for _, name in ipairs({ 'rust_analyzer', 'ts_ls', 'pyright', 'jsonls', 'lua_ls' }) do
+    vim.lsp.config(name, { root_dir = require('config.large_files').guard_root(vim.lsp.config[name]) })
+  end
   require('mason-lspconfig').setup({
     ensure_installed = { 'ts_ls', 'pyright', 'jsonls', 'lua_ls' },
     automatic_enable = { 'ts_ls', 'pyright', 'jsonls', 'lua_ls' },
