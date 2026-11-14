@@ -21,6 +21,12 @@ with `:` finish with Enter. Space is the configured leader key.
 | Keys | Mode | Action |
 | --- | --- | --- |
 | `Ctrl+P`, `Space f f` | Normal | Find project files |
+| `Ctrl+Shift+P`, `Space f p` | Normal / insert; leader in normal | Search commands |
+| `Space f k` | Normal | Search keybindings |
+| `Ctrl+S` | Normal, insert | Save the current file |
+| `Ctrl+backtick`, `Space f t`, `:TerminalToggle` | Normal, insert, terminal; leader in normal | Hide/show the shared terminal panel |
+| `Space d x` | Normal | Search diagnostics reported across buffers |
+| `F2` / `F12` / `Alt+Enter` | Normal, insert; LSP attached | Rename / definition / code actions |
 | `Space f g` | Normal | Search file contents with ripgrep |
 | `Space f b` | Normal | Pick an open buffer |
 | `Ctrl+H` / `Space ?` | Normal | Show shortcut discovery popup |
@@ -275,3 +281,25 @@ the custom window and tab shortcuts above are exceptions.
 Run `:map`, `:imap`, or `:tmap` for normal/visual, insert, or terminal mappings.
 `:verbose nmap <C-.>` shows which file defined the next-tab shortcut.
 `:help` opens Neovim documentation. `:help <topic>` searches a specific topic.
+
+## Memory and terminal behavior
+
+The terminal starts open. Hiding its panel keeps the same shell and jobs alive;
+showing it focuses terminal input. Hiding it returns focus to the editor. An
+exited shell is recreated on the next toggle. The panel shares one shell across
+tab pages; sessions still start a fresh shell after restarting Neovim.
+
+Modified keys depend on terminal support. Use Space f p for the palette,
+Space f t for the terminal, and the existing Space c a for code actions when
+a terminal intercepts a shortcut. Ctrl+S is not remapped inside terminal input.
+
+Completion loads when typing starts, formatters and pickers when invoked, and
+Git/indentation/LSP tools when files are opened. The existing layout and debugger
+remain available; lazy loading saves memory only until a feature is used.
+
+Buffers above 1 MiB or with lines longer than 10,000 bytes skip Tree-sitter,
+indentation guides, buffer-word completion, and automatic LSP attachment. These
+features resume when the buffer becomes small again. Thresholds live in
+`lua/config/large_files.lua`. Ordinary files retain normal language features.
+The Problems picker lists diagnostics already reported by servers; it does not
+force servers to inspect every unopened project file.
