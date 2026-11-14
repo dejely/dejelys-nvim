@@ -26,46 +26,85 @@ local function save_directory()
   end
 end
 
-local function layout()
-  local editor = vim.api.nvim_get_current_win()
-  require('nvim-tree.api').tree.open({ focus = false })
-  vim.api.nvim_set_current_win(editor)
-  vim.cmd('botright 10new')
-  local win = vim.api.nvim_get_current_win()
-  vim.wo[win].number = false
-  vim.wo[win].relativenumber = false
-  vim.wo[win].signcolumn = 'no'
-  vim.wo[win].cursorline = false
-  vim.wo[win].winfixheight = true
+local function focus_editor()
+  if M.editor and vim.api.nvim_win_is_valid(M.editor)
+    and vim.api.nvim_win_get_tabpage(M.editor) == vim.api.nvim_get_current_tabpage() then
+    vim.api.nvim_set_current_win(M.editor)
+  end
+  vim.cmd.stopinsert()
+end
+
+local function terminal_windows()
+  local wins = {}
   if M.terminal_buf and vim.api.nvim_buf_is_valid(M.terminal_buf) then
-    local blank = vim.api.nvim_get_current_buf()
-    vim.api.nvim_win_set_buf(0, M.terminal_buf)
-    vim.api.nvim_buf_delete(blank, { force = true })
-    vim.api.nvim_set_current_win(editor)
-    vim.cmd.stopinsert()
+    for _, win in ipairs(vim.fn.win_findbuf(M.terminal_buf)) do
+      if vim.api.nvim_win_get_tabpage(win) == vim.api.nvim_get_current_tabpage() then
+        wins[#wins + 1] = win
+      end
+    end
+  end
+  return wins
+end
+
+function M.show_terminal(focus)
+  local wins = terminal_windows()
+  if #wins > 0 then
+    if focus then vim.api.nvim_set_current_win(wins[1]); vim.cmd.startinsert() end
     return
   end
-  local terminal = vim.api.nvim_get_current_buf()
-  M.terminal_buf = terminal
-  vim.fn.jobstart({ vim.o.shell }, {
-    term = true,
-    on_exit = function()
-      vim.schedule(function()
-        if vim.api.nvim_buf_is_valid(terminal) then
+  local changing = M.changing_layout
+  M.changing_layout = true
+  vim.cmd('botright 10new')
+  local win = vim.api.nvim_get_current_win()
+  for name, value in pairs({ number = false, relativenumber = false, signcolumn = 'no',
+    cursorline = false, winfixheight = true }) do vim.wo[win][name] = value end
+  if M.terminal_buf and vim.api.nvim_buf_is_valid(M.terminal_buf) then
+    local blank = vim.api.nvim_get_current_buf()
+    vim.api.nvim_win_set_buf(win, M.terminal_buf)
+    vim.api.nvim_buf_delete(blank, { force = true })
+  else
+    local terminal = vim.api.nvim_get_current_buf()
+    M.terminal_buf = terminal
+    vim.bo[terminal].bufhidden = 'hide'
+    vim.fn.jobstart({ vim.o.shell }, {
+      term = true,
+      on_exit = function()
+        vim.schedule(function()
+          if M.terminal_buf == terminal then M.terminal_buf = nil end
+          if not vim.api.nvim_buf_is_valid(terminal) then return end
+          local focused = vim.api.nvim_get_current_buf() == terminal
           for _, terminal_win in ipairs(vim.fn.win_findbuf(terminal)) do
-            if #vim.api.nvim_tabpage_list_wins(0) > 1 then
-              vim.api.nvim_win_close(terminal_win, true)
-            end
+            local tab = vim.api.nvim_win_get_tabpage(terminal_win)
+            if #vim.api.nvim_tabpage_list_wins(tab) > 1 then vim.api.nvim_win_close(terminal_win, true) end
           end
-          if vim.api.nvim_buf_is_valid(terminal) then
-            vim.api.nvim_buf_delete(terminal, { force = true })
-          end
-        end
-      end)
-    end,
-  })
-  vim.api.nvim_set_current_win(editor)
-  vim.cmd.stopinsert()
+          vim.api.nvim_buf_delete(terminal, { force = true })
+          if focused then focus_editor() end
+        end)
+      end,
+    })
+  end
+  M.changing_layout = changing
+  if focus then vim.cmd.startinsert() else focus_editor() end
+end
+
+function M.toggle_terminal()
+  local wins = terminal_windows()
+  if #wins == 0 then M.show_terminal(true); return end
+  if #vim.api.nvim_tabpage_list_wins(0) == 1 then
+    vim.cmd('aboveleft new')
+    M.editor = vim.api.nvim_get_current_win()
+  end
+  for _, win in ipairs(wins) do vim.api.nvim_win_close(win, true) end
+  focus_editor()
+end
+
+local function layout()
+  M.changing_layout = true
+  M.editor = vim.api.nvim_get_current_win()
+  require('nvim-tree.api').tree.open({ focus = false })
+  vim.api.nvim_set_current_win(M.editor)
+  M.show_terminal(false)
+  M.changing_layout = false
 end
 
 function M.restore_session()
@@ -96,7 +135,18 @@ function M.open()
 end
 
 function M.setup()
+  vim.keymap.set({ 'n', 'i', 't' }, '<C-`>', function()
+    vim.cmd.stopinsert()
+    M.toggle_terminal()
+  end, { desc = 'Toggle terminal panel' })
+  vim.keymap.set('n', '<leader>ft', M.toggle_terminal, { desc = 'Toggle terminal panel' })
+  vim.api.nvim_create_user_command('TerminalToggle', M.toggle_terminal, {})
   local group = vim.api.nvim_create_augroup('CustomStartupLayout', { clear = true })
+  vim.api.nvim_create_autocmd('WinEnter', {
+    group = group, callback = function()
+      if not M.changing_layout and vim.bo.buftype == '' then M.editor = vim.api.nvim_get_current_win() end
+    end,
+  })
   vim.api.nvim_create_autocmd('StdinReadPre', {
     group = group,
     callback = function() M.reading_stdin = true end,
